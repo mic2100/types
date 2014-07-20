@@ -1,0 +1,21 @@
+{
+    "name": "mmic2100/types",
+    "description": "Provides an OOP approach to the native PHP array methods.",
+    "keywords": ["array", "oop", "arrayobject"],
+    "license": "WTFPL",
+    "require": {
+        "php": ">=5.5"
+    },
+    "authors": [
+        {
+            "name": "Michael Bardsley",
+            "email": "me@mic-b.co.uk"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Mic2100\\Types": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
