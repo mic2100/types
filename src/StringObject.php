@@ -17,6 +17,13 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
     protected $value;
 
     /**
+     * Various method can take into account the case when performing their operation
+     *
+     * @var bool
+     */
+    protected $caseSensitive = true;
+
+    /**
      * Constructor
      *
      * @param string $string
@@ -63,6 +70,16 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
     public function get()
     {
         return $this->value;
+    }
+
+    /**
+     * Changes the $caseSensitive var between true and false
+     *
+     * @param bool $sensitive
+     */
+    public function caseSensitive($sensitive)
+    {
+        $this->caseSensitive = (bool) $sensitive;
     }
 
     /**
@@ -460,14 +477,13 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
      * @link http://php.net/manual/en/function.str-replace.php
      * @param mixed $search
      * @param mixed $replace
-     * @param bool $caseSensitive
      * @param <int|null> $count
      * @return $this
      */
-    public function replace($search, $replace, $caseSensitive = true, &$count = null)
+    public function replace($search, $replace, &$count = null)
     {
         $this->set(
-            $caseSensitive
+            $this->caseSensitive
                 ? str_replace($search, $replace, $this->get(), $count)
                 : str_ireplace($search, $replace, $this->get(), $count)
         );
@@ -613,13 +629,12 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
      * @link http://php.net/manual/en/function.stripos.php
      * @link http://php.net/manual/en/function.strpos.php
      * @param string $needle
-     * @param bool $caseSensitive
      * @param int $offset
      * @return int
      */
-    public function pos($needle, $caseSensitive = true, $offset = 0)
+    public function pos($needle, $offset = 0)
     {
-        return $caseSensitive ? strpos($this->get(), $needle, $offset) : stripos($this->get(), $needle, $offset);
+        return $this->caseSensitive ? strpos($this->get(), $needle, $offset) : stripos($this->get(), $needle, $offset);
     }
 
     /**
@@ -637,13 +652,12 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
      * @link http://php.net/manual/en/function.stristr.php
      * @link http://php.net/manual/en/function.strstr.php
      * @param $needle
-     * @param bool $caseSensitive
      * @param bool $beforeNeedle
      */
-    public function str($needle, $caseSensitive = true, $beforeNeedle = false)
+    public function str($needle, $beforeNeedle = false)
     {
         $this->set(
-            $caseSensitive
+            $this->caseSensitive
                 ? strstr($this->get(), $needle, $beforeNeedle)
                 : stristr($this->get(), $needle, $beforeNeedle)
         );
@@ -661,12 +675,11 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
     /**
      * @link http://php.net/manual/en/function.strnatcasecmp.php
      * @param string $string
-     * @param bool $caseSensitive
      * @return int
      */
-    public function natcmp($string, $caseSensitive = true)
+    public function natcmp($string)
     {
-        return $caseSensitive ? strnatcmp($this->get(), $string) : strnatcasecmp($this->get(), $string);
+        return $this->caseSensitive ? strnatcmp($this->get(), $string) : strnatcasecmp($this->get(), $string);
     }
 
     /**
@@ -674,12 +687,13 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
      * @link http://php.net/manual/en/function.strncmp.php
      * @param string $string
      * @param int $length
-     * @param bool $caseSensitive
      * @return int
      */
-    public function ncmp($string, $length, $caseSensitive = true)
+    public function ncmp($string, $length)
     {
-        return $caseSensitive ? strncmp($this->get(), $string, $length) : strncasecmp($this->get(), $string, $length);
+        return $this->caseSensitive
+                   ? strncmp($this->get(), $string, $length)
+                   : strncasecmp($this->get(), $string, $length);
     }
 
     /**
@@ -715,13 +729,14 @@ class StringObject implements \Countable, \JsonSerializable, \Serializable
      * @link http://php.net/manual/en/function.strripos.php
      * @link http://php.net/manual/en/function.strrpos.php
      * @param mixed $needle
-     * @param bool $caseSensitive
      * @param int $offset
      * @return int
      */
-    public function ripos($needle, $caseSensitive = true, $offset = 0)
+    public function ripos($needle, $offset = 0)
     {
-        return $caseSensitive ? strrpos($this->get(), $needle, $offset) : strripos($this->get(), $needle, $offset);
+        return $this->caseSensitive
+                   ? strrpos($this->get(), $needle, $offset)
+                   : strripos($this->get(), $needle, $offset);
     }
 
     /**
