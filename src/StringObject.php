@@ -9,7 +9,7 @@ namespace Mic2100\Types;
  * @package Mic2100\Types
  * @author Michael Bardsley <@mic_bardsley>
  */
-class StringObject
+class StringObject implements \Countable, \JsonSerializable, \Serializable
 {
     /**
      * @var string
@@ -833,5 +833,62 @@ class StringObject
         $this->set(wordwrap($this->get(), $width, $break, $cut));
 
         return $this;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * String representation of object
+     *
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     */
+    public function serialize()
+    {
+        return new static(serialize($this->get()));
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Constructs the object
+     *
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized <p>
+     * The string representation of the object.
+     * </p>
+     * @return void
+     */
+    public function unserialize($serialized)
+    {
+        $this->set(unserialize($serialized));
+
+        return;
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Count elements of an object
+     *
+     * @link http://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     * </p>
+     * <p>
+     * The return value is cast to an integer.
+     */
+    public function count()
+    {
+        return $this->len();
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.4.0)<br/>
+     * Specify data which should be serialized to JSON
+     *
+     * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed data which can be serialized by <b>json_encode</b>,
+     * which is a value of any type other than a resource.
+     */
+    function jsonSerialize()
+    {
+        return $this->get();
     }
 }
