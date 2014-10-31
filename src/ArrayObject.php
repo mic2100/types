@@ -7,51 +7,54 @@ namespace Mic2100\Types;
  *
  * @description Provides an OOP approach to the native PHP array methods.
  * @package Mic2100\Types
- * @author Michael Bardsley <me@mic-b.co.uk>
+ * @author Michael Bardsley <@mic_bardsley>
  */
-class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
+class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable, \Serializable
 {
     /**
      * @var array
      */
-    private $array = [];
+    protected $value;
 
     /**
      * Constructor
      *
-     * @param array $array
+     * @param array $value
      */
-    public function __construct(array $array = [])
+    public function __construct(array $value = [])
     {
-        $this->set($array);
+        $this->set($value);
     }
 
     /**
-     * Set the array that is currently stored
+     * Sets the array
      *
-     * @param array $array
+     * @param array $value
      * @return $this
      */
-    public function set(array $array = [])
+    public function set($value = [])
     {
-        $this->array = $array;
+        $this->value = (array) $value;
 
         return $this;
     }
 
     /**
-     * Get the array that is currently stored
+     * Gets the array
      *
-     * @param string|null $name
      * @return array
      */
-    public function get($name = null)
+    public function get()
     {
-        if (is_null($name)) {
-            return $this->array;
-        }
+        return $this->value;
+    }
 
-        return $this->array[$name];
+    /**
+     * @return static
+     */
+    public function __clone()
+    {
+        return new static($this->get());
     }
 
     /**
@@ -61,7 +64,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function toArray()
     {
-        return $this->get(null);
+        return is_array($this->get()) ? $this->get() : [$this->get()];
     }
 
     /**
@@ -71,7 +74,17 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function toIterator()
     {
-        return new \ArrayIterator($this->get(null));
+        return new \ArrayIterator($this->get());
+    }
+
+    /**
+     * Returns the array that has been created as an ArrayObject
+     *
+     * @return \ArrayObject
+     */
+    public function toObject()
+    {
+        return new \ArrayObject($this->get());
     }
 
     /**
@@ -81,7 +94,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function arsort($flags = SORT_REGULAR)
     {
-        arsort($this->array, $flags);
+        arsort($this->get(), $flags);
 
         return $this;
     }
@@ -93,7 +106,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function asort($flags = SORT_REGULAR)
     {
-        asort($this->array, $flags);
+        asort($this->get(), $flags);
 
         return $this;
     }
@@ -101,44 +114,50 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
     /**
      * @link http://php.net/manual/en/function.array-change-key-case.php
      * @param int $case
-     * @return static
+     * @return $this
      */
     public function changeKeyCase($case = CASE_LOWER)
     {
-        return new static(array_change_key_case($this->array, $case));
+        $this->set(array_change_key_case($this->get(), $case));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-chunk.php
      * @param $size
      * @param bool $preserveKeys
-     * @return static
+     * @return $this
      */
     public function chunk($size, $preserveKeys = false)
     {
-        return new static(array_chunk($this->array, $size, $preserveKeys));
+        $this->set(array_chunk($this->get(), $size, $preserveKeys));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-column.php
      * @param $columnKey
-     * @param int|null $indexKey
+     * @param <int|null> $indexKey
      * @return static
      */
     public function column($columnKey, $indexKey = null)
     {
-        return new static(array_column($this->array, $columnKey, $indexKey));
+        return new static(array_column($this->get(), $columnKey, $indexKey));
     }
 
     /**
      * @link http://php.net/manual/en/function.array-combine.php
      * @param array $keys
      * @param array $values
-     * @return static
+     * @return $this
      */
     public function combine(array $keys, array $values)
     {
-        return new static(array_combine($keys, $values));
+        $this->set(array_combine($keys, $values));
+
+        return $this;
     }
 
     /**
@@ -147,59 +166,69 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function countValues()
     {
-        return new static(array_count_values($this->array));
+        return new static(array_count_values($this->get()));
     }
 
     /**
      * @link http://php.net/manual/en/function.array-diff-assoc.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function diffAssoc(array $array)
     {
-        return new static(array_diff_assoc($this->array, $array));
+        $this->set(array_diff_assoc($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-diff-key.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function diffKey(array $array)
     {
-        return new static(array_diff_key($this->array, $array));
+        $this->set(array_diff_key($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-diff-uassoc.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function diffUassoc(array $array, callable $func)
     {
-        return new static(array_diff_uassoc($this->array, $array, $func));
+        $this->set(array_diff_uassoc($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-diff-ukey.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function diffUkey(array $array, callable $func)
     {
-        return new static(array_diff_ukey($this->array, $array, $func));
+        $this->set(array_diff_ukey($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-diff.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function diff(array $array)
     {
-        return new static(array_diff($this->array, $array));
+        $this->set(array_diff($this->get(), $array));
+
+        return $this;
     }
 
     /**
@@ -207,41 +236,49 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @param int $start
      * @param int $num
      * @param mixed $value
-     * @return static
+     * @return $this
      */
     public function fill($start, $num, $value)
     {
-        return new static(array_fill((int) $start, (int) $num, $value));
+        $this->set(array_fill((int) $start, (int) $num, $value));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-fill-keys.php
      * @param array $keys
      * @param mixed $value
-     * @return static
+     * @return $this
      */
     public function fillKeys(array $keys, $value)
     {
-        return new static(array_fill_keys($keys, $value));
+        $this->set(array_fill_keys($keys, $value));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-filter.php
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function filter(callable $func)
     {
-        return new static(array_filter($this->array, $func));
+        $this->set(array_filter($this->get(), $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-flip.php
-     * @return static
+     * @return $this
      */
     public function flip()
     {
-        return new static(array_flip($this->array));
+        $this->set(array_flip($this->get()));
+
+        return $this;
     }
 
     /**
@@ -252,59 +289,69 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function in($needle, $strict = false)
     {
-        return in_array($needle, $this->array, $strict);
+        return in_array($needle, $this->get(), $strict);
     }
 
     /**
      * @link http://php.net/manual/en/function.array-intersect-assoc.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function intersectAssoc(array $array)
     {
-        return new static(array_intersect_assoc($this->array, $array));
+        $this->set(array_intersect_assoc($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-intersect-key.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function intersectKey(array $array)
     {
-        return new static(array_intersect_key($this->array, $array));
+        $this->set(array_intersect_key($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-intersect-uassoc.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function intersectUassoc(array $array, callable $func)
     {
-        return new static(array_intersect_uassoc($this->array, $array, $func));
+        $this->set(array_intersect_uassoc($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-intersect-ukey.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function intersectUkey(array $array, callable $func)
     {
-        return new static(array_intersect_ukey($this->array, $array, $func));
+        $this->set(array_intersect_ukey($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-intersect.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function intersect(array $array)
     {
-        return new static(array_intersect($this->array, $array));
+        $this->set(array_intersect($this->get(), $array));
+
+        return $this;
     }
 
     /**
@@ -314,7 +361,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function keyExists($key)
     {
-        return isset($this->array[$key]) || array_key_exists($key, $this->array);
+        return isset($this->get()[$key]) || array_key_exists($key, $this->get());
     }
 
     /**
@@ -323,7 +370,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function keys()
     {
-        return new static(array_keys($this->array));
+        return new static(array_keys($this->get()));
     }
 
     /**
@@ -333,7 +380,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function krsort($flags = SORT_REGULAR)
     {
-        krsort($this->array, $flags);
+        krsort($this->get(), $flags);
 
         return $this;
     }
@@ -345,7 +392,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function ksort($flags = SORT_REGULAR)
     {
-        ksort($this->array, $flags);
+        ksort($this->get(), $flags);
 
         return $this;
     }
@@ -353,21 +400,25 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
     /**
      * @link http://php.net/manual/en/function.array-map.php
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function map(callable $func)
     {
-        return new static(array_map($func, $this->array));
+        $this->set(array_map($func, $this->get()));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-merge.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function merge(array $array)
     {
-        return new static(array_merge($this->array, $array));
+        $this->set(array_merge($this->get(), $array));
+
+        return $this;
     }
 
     /**
@@ -376,7 +427,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function natcasesort()
     {
-        natcasesort($this->array);
+        natcasesort($this->get());
 
         return $this;
     }
@@ -387,7 +438,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function natsort()
     {
-        natsort($this->array);
+        natsort($this->get());
 
         return $this;
     }
@@ -396,11 +447,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @link http://php.net/manual/en/function.array-pad.php
      * @param int $size
      * @param mixed $value
-     * @return static
+     * @return $this
      */
     public function pad($size, $value)
     {
-        return new static(array_pad($this->array, $size, $value));
+        $this->set(array_pad($this->get(), $size, $value));
+
+        return $this;
     }
 
     /**
@@ -409,7 +462,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function pop()
     {
-        return array_pop($this->array);
+        return array_pop($this->get());
     }
 
     /**
@@ -418,7 +471,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function product()
     {
-        return array_product($this->array);
+        return array_product($this->get());
     }
 
     /**
@@ -428,7 +481,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function push($value)
     {
-        array_push($this->array, $value);
+        array_push($this->get(), $value);
 
         return $this;
     }
@@ -440,7 +493,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function rand($num = 1)
     {
-        return array_rand($this->array, $num);
+        return array_rand($this->get(), $num);
     }
 
     /**
@@ -451,37 +504,43 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function reduce($initial, callable $func)
     {
-        return array_reduce($this->array, $func, $initial);
+        return array_reduce($this->get(), $func, $initial);
     }
 
     /**
      * @link http://php.net/manual/en/function.array-replace-recursive.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function replaceRecursive(array $array)
     {
-        return new static(array_replace_recursive($this->array, $array));
+        $this->set(array_replace_recursive($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-replace.php
      * @param array $array
-     * @return static
+     * @return $this
      */
     public function replace(array $array)
     {
-        return new static(array_replace($this->array, $array));
+        $this->set(array_replace($this->get(), $array));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-reverse.php
      * @param bool $preserveKeys
-     * @return static
+     * @return $this
      */
     public function reverse($preserveKeys = false)
     {
-        return new static(array_reverse($this->array, (bool) $preserveKeys));
+        $this->set(array_reverse($this->get(), (bool) $preserveKeys));
+
+        return $this;
     }
 
     /**
@@ -491,7 +550,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function rsort($flags = SORT_REGULAR)
     {
-        rsort($this->array, $flags);
+        rsort($this->get(), $flags);
 
         return $this;
     }
@@ -504,7 +563,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function search($needle, $strict = false)
     {
-        return array_search($needle, $this->array, $strict);
+        return array_search($needle, $this->get(), $strict);
     }
 
     /**
@@ -513,7 +572,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function shift()
     {
-        return array_shift($this->array);
+        return array_shift($this->get());
     }
 
     /**
@@ -522,7 +581,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function shuffle()
     {
-        shuffle($this->array);
+        shuffle($this->get());
 
         return $this;
     }
@@ -532,11 +591,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @param $offset
      * @param null $length
      * @param bool $preserveKeys
-     * @return static
+     * @return $this
      */
     public function slice($offset, $length = null, $preserveKeys = false)
     {
-        return new static(array_slice($this->array, $offset, $length, $preserveKeys));
+        $this->set(array_slice($this->get(), $offset, $length, $preserveKeys));
+
+        return $this;
     }
 
     /**
@@ -546,7 +607,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function sort($flags = SORT_REGULAR)
     {
-        sort($this->array, $flags);
+        sort($this->get(), $flags);
 
         return $this;
     }
@@ -560,7 +621,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function splice($offset, $length = 0, $replacement = [])
     {
-        array_splice($this->array, $offset, $length, $replacement);
+        array_splice($this->get(), $offset, $length, $replacement);
 
         return $this;
     }
@@ -571,7 +632,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function sum()
     {
-        return array_sum($this->array);
+        return array_sum($this->get());
     }
 
     /**
@@ -581,7 +642,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function uasort(callable $func)
     {
-        uasort($this->array, $func);
+        uasort($this->get(), $func);
 
         return $this;
     }
@@ -590,11 +651,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @link http://php.net/manual/en/function.array-udiff-assoc.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function udiffAssoc(array $array, callable $func)
     {
-        return new static(array_udiff_assoc($this->array, $array, $func));
+        $this->set(array_udiff_assoc($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
@@ -602,33 +665,39 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @param array $array
      * @param callable $valueFunc
      * @param callable $keyFunc
-     * @return static
+     * @return $this
      */
     public function udiffUassoc(array $array, callable $valueFunc, callable $keyFunc)
     {
-        return new static(array_udiff_uassoc($this->array, $array, $valueFunc, $keyFunc));
+        $this->set(array_udiff_uassoc($this->get(), $array, $valueFunc, $keyFunc));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-udiff.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function udiff(array $array, callable $func)
     {
-        return new static(array_udiff($this->array, $array, $func));
+        $this->set(array_udiff($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-uintersect-assoc.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function uintersectAssoc(array $array, callable $func)
     {
-        return new static(array_uintersect_assoc($this->array, $array, $func));
+        $this->set(array_uintersect_assoc($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
@@ -636,22 +705,26 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      * @param array $array
      * @param callable $valueFunc
      * @param callable $keyFunc
-     * @return static
+     * @return $this
      */
     public function uintersectUassoc(array $array, callable $valueFunc, callable $keyFunc)
     {
-        return new static(array_uintersect_uassoc($this->array, $array, $valueFunc, $keyFunc));
+        $this->set(array_uintersect_uassoc($this->get(), $array, $valueFunc, $keyFunc));
+
+        return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-uintersect.php
      * @param array $array
      * @param callable $func
-     * @return static
+     * @return $this
      */
     public function uintersect(array $array, callable $func)
     {
-        return new static(array_uintersect($this->array, $array, $func));
+        $this->set(array_uintersect($this->get(), $array, $func));
+
+        return $this;
     }
 
     /**
@@ -661,7 +734,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function uksort(callable $func)
     {
-        uksort($this->array, $func);
+        uksort($this->get(), $func);
 
         return $this;
     }
@@ -669,11 +742,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
     /**
      * @link http://php.net/manual/en/function.array-unique.php
      * @param int $flags
-     * @return static
+     * @return $this
      */
     public function unique($flags = SORT_STRING)
     {
-        return new static(array_unique($this->array, $flags));
+        $this->set(array_unique($this->get(), $flags));
+
+        return $this;
     }
 
     /**
@@ -683,7 +758,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function unshift($value)
     {
-        array_unshift($this->array, $value);
+        array_unshift($this->get(), $value);
 
         return $this;
     }
@@ -695,18 +770,20 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function usort(callable $func)
     {
-        usort($this->array, $func);
+        usort($this->get(), $func);
 
         return $this;
     }
 
     /**
      * @link http://php.net/manual/en/function.array-values.php
-     * @return static
+     * @return $this
      */
     public function values()
     {
-        return new static(array_values($this->array));
+        $this->set(array_values($this->get()));
+
+        return $this;
     }
 
     /**
@@ -717,7 +794,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function walkRecursive(callable $func, $userData = null)
     {
-        array_walk_recursive($this->array, $func, $userData);
+        array_walk_recursive($this->get(), $func, $userData);
 
         return $this;
     }
@@ -730,13 +807,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function walk(callable $func, $userData = null)
     {
-        array_walk($this->array, $func, $userData);
+        array_walk($this->get(), $func, $userData);
 
         return $this;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)
+     * (PHP 5 >= 5.0.0)
      * Whether a offset exists
      *
      * @link http://php.net/manual/en/arrayaccess.offsetexists.php
@@ -745,7 +822,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function offsetExists($offset)
     {
-        if (isset($this->array[$offset]) || array_key_exists($offset, $this->array)) {
+        if (isset($this->get()[$offset]) || array_key_exists($offset, $this->get())) {
             return true;
         }
 
@@ -753,7 +830,7 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)
+     * (PHP 5 >= 5.0.0)
      * Offset to retrieve
      *
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
@@ -762,11 +839,11 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function offsetGet($offset)
     {
-        return $this->array[$offset];
+        return $this->get()[$offset];
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)
+     * (PHP 5 >= 5.0.0)
      * Offset to set
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
@@ -776,13 +853,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function offsetSet($offset, $value)
     {
-        $this->array[$offset] = $value;
+        $this->get()[$offset] = $value;
 
         return;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)
+     * (PHP 5 >= 5.0.0)
      * Offset to unset
      *
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
@@ -791,13 +868,13 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function offsetUnset($offset)
     {
-        unset($this->array[$offset]);
+        unset($this->get()[$offset]);
 
         return;
     }
 
     /**
-     * (PHP 5 &gt;= 5.1.0)
+     * (PHP 5 >= 5.1.0)
      * Count elements of an object
      *
      * @link http://php.net/manual/en/countable.count.php
@@ -805,11 +882,11 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function count()
     {
-        return sizeof($this->array);
+        return sizeof($this->get());
     }
 
     /**
-     * (PHP 5 &gt;= 5.4.0)
+     * (PHP 5 >= 5.4.0)
      * Specify data which should be serialized to JSON
      *
      * @link http://php.net/manual/en/jsonserializable.jsonserialize.php
@@ -818,6 +895,40 @@ class ArrayObject implements \ArrayAccess, \Countable, \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return json_encode($this->array);
+        return json_encode($this->get());
+    }
+
+    /**
+     * (PHP 5 >= 5.1.0)
+     * String representation of object
+     *
+     * @link http://php.net/manual/en/serializable.serialize.php
+     * @return string the string representation of the object or null
+     */
+    public function serialize()
+    {
+        return serialize($this->get());
+    }
+
+    /**
+     * (PHP 5 >= 5.1.0)
+     * Constructs the object
+     *
+     * @link http://php.net/manual/en/serializable.unserialize.php
+     * @param string $serialized The string representation of the object.
+     * @throws \RangeException
+     * @return void
+     */
+    public function unserialize($serialized)
+    {
+        $value = unserialize($serialized);
+
+        if (is_array($value)) {
+            throw new \RangeException('Error: unserialize value is not an array');
+        }
+
+        $this->value = $value;
+
+        return;
     }
 }

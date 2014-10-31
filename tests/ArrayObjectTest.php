@@ -6,7 +6,12 @@ class ArrayObjectTests extends \PHPUnit_Framework_Testcase
 {
     protected $array;
 
-    public function test_set_get_iterator_with_an_associative_array()
+    protected function instantiateArrayObject(array $array = [])
+    {
+        return new ArrayObject($array);
+    }
+
+    public function test_set_and_get_iterator_with_an_associative_array()
     {
         $ao = new ArrayObject;
 
@@ -14,6 +19,7 @@ class ArrayObjectTests extends \PHPUnit_Framework_Testcase
 
         $this->assertSame($this->assoc_array_sample(), $ao->get());
         $this->assertInstanceOf('ArrayIterator', $ao->toIterator());
+        $this->assertInstanceOf('ArrayObject', $ao->toObject());
     }
 
     public function test_arsort()
@@ -22,8 +28,8 @@ class ArrayObjectTests extends \PHPUnit_Framework_Testcase
 
         $ao->arsort();
 
-        $this->assertNotSame($this->assoc_array_sample(), $ao->toArray());
-        $this->assertSame($this->arsort_assoc_array_sample(), $ao->toArray());
+        $this->assertSame($this->assoc_array_sample(), $ao->toArray());
+        $this->assertNotSame($this->arsort_assoc_array_sample(), $ao->toArray());
     }
 
     public function test_asort()
